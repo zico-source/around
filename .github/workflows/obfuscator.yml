@@ -21,17 +21,9 @@ jobs:
       - name: 安装依赖
         run: npm install -g javascript-obfuscator
 
-      - name: 检查备份文件是否存在
-        run: |
-          if [ ! -f _worker.js.backup ]; then
-            echo "备份文件 _worker.js.backup 不存在，正在创建..."
-            cp _worker.js _worker.js.backup
-          fi
-          cp _worker.js.backup _worker_temp.js
-
       - name: 混淆代码
         run: |
-          javascript-obfuscator _worker_temp.js --output _worker.js \
+          javascript-obfuscator _worker.js --output _worker_o.js \
           --compact true \
           --control-flow-flattening true \
           --control-flow-flattening-threshold 1 \
@@ -49,11 +41,11 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add _worker.js _worker.js.backup
+          git add _worker_o.js
           if git diff --cached --quiet; then
             echo "没有文件更改，跳过提交"
           else
-            git commit -m "混淆 _worker.js 文件并备份原文件"
+            git commit -m "add _worker_o.js"
           fi
 
       - name: 推送更改
