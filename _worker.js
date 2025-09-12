@@ -12,7 +12,7 @@ import { connect } from 'cloudflare:sockets';
 
 let subPath = 'subInfo';
 let subPathLow;
-let readyHosts = [atob('c3BlZWQuY2xvd'+'WRmbGFyZS5jb20=')];
+let readyHosts = [atob('c3BlZWQuY2xvd' + 'WRmbGFyZS5jb20=')];
 let enableSocks = false;
 let enableHttp = false;
 let proxyIP = '';
@@ -26,27 +26,105 @@ let go2Socks5s = [
     '*.loadshare.org'
 ];
 
+let BotToken;
+let ChatID;
+let FileName = atob('ZWRnZXR1' + 'bm5lbA==');
+let RproxyIP = 'false';
+const expire = 4102329599
+let addresses = [];
+const httpPorts = ["8080", "8880", "2052", "2082", "2086", "2095"];
+let httpsPorts = ["2053", "2083", "2087", "2096", "8443"];
+let addressesapi = [];
+let addressesnotls = [];
+let addressesnotlsapi = [];
+let addressescsv = [];
+let link = [];
+
+let proxyhosts = [];
+let proxyhostsURL = atob('aHR0cHM6Ly9yYXcuZ2l0aHVid' + 'XNlcmNvbnRlbnQuY29tL2NtbGl1L2Nt' + 'bGl1L21haW4vUHJveHlIT1NU');
+let noTLS = 'false';
+let socks5s;
+let subProtocol = 'https';
+let path = '/?ed=2560';
+let subConverter = atob('U1VCQVBJLkNN' + 'TGl1c3Nzcy5uZXQ=');
+let subConfig = atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNv' + 'bnRlbnQuY29tL0FDTDRTU1IvQUNMNFNTUi9tYXN0ZXIvQ2xhc2gvY29uZmlnL0FDTDRTU1JfT25saW5lX01pbmlfTXVsdGlNb2RlLmluaQ==');
+let subEmoji = 'true';
+let SCV = 'true';
+let allowInsecure = '&allowInsecure=1';
+let proxyIPPool = [];
+let DLS = 8;
+let remarkIndex = 1;
+let socks5Address = '';
+
 export default {
     async fetch(request, env, ctx) {
 
         const upgradeHeader = request.headers.get('Upgrade');
         const url = new URL(request.url);
+        const UA = request.headers.get('User-Agent') || 'null';
+        const userAgent = UA.toLowerCase();
 
 
         if (!upgradeHeader || upgradeHeader !== 'websocket') {
 
+            BotToken = env.TGTOKEN || BotToken;
+            ChatID = env.TGID || ChatID;
+            socks5s = await 整理(socks5Address);
+
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            const timestamp = Math.ceil(currentDate.getTime() / 1000);
+
+            const mirrorUserIDMD5 = await 双重哈希(`${subPath}${timestamp}`);
+            const mirrorUserID = [
+                mirrorUserIDMD5.slice(0, 8),
+                mirrorUserIDMD5.slice(8, 12),
+                mirrorUserIDMD5.slice(12, 16),
+                mirrorUserIDMD5.slice(16, 20),
+                mirrorUserIDMD5.slice(20)
+            ].join('-');
+            let sub = env.SUB || '';
+            const mirrorHostName = `${mirrorUserIDMD5.slice(6, 9)}.${mirrorUserIDMD5.slice(13, 19)}`;
+
             const reqPath = url.pathname.toLowerCase();
             if (reqPath == '/') {
                 if (env.URL302) return Response.redirect(env.URL302, 302);
-                // else if (env.URL) return await 代理URL(env.URL, url);
                 else return new Response('Hello World!');
-            } else if (reqPath != '/') {
-                return new Response('Hello World! Path: ' + reqPath);
+            } else if (url.pathname == `/${subPath}`) {
+                await sendMessage(`#获取订阅 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${UA}</tg-spoiler>\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
+                const epConfig = await genConf(subPath, request.headers.get('Host'), sub, UA, RproxyIP, url, mirrorUserID, mirrorHostName, env);
+                const now = Date.now();
+                const today = new Date(now);
+                today.setHours(0, 0, 0, 0);
+                const UD = Math.floor(((now - today.getTime()) / 86400000) * 24 * 1099511627776 / 2);
+                let pagesSum = UD;
+                let workersSum = UD;
+                let total = 24 * 1099511627776;
+                if (userAgent && userAgent.includes('mozilla')) {
+                    return new Response(epConfig, {
+                        status: 200,
+                        headers: {
+                            "Content-Type": "text/html;charset=utf-8",
+                            "Profile-Update-Interval": "6",
+                            "Subscription-Userinfo": `upload=${pagesSum}; download=${workersSum}; total=${total}; expire=${expire}`,
+                            "Cache-Control": "no-store",
+                        }
+                    });
+                } else {
+                    return new Response(epConfig, {
+                        status: 200,
+                        headers: {
+                            "Content-Disposition": `attachment; filename=${FileName}; filename*=utf-8''${encodeURIComponent(FileName)}`,
+                            "Profile-Update-Interval": "6",
+                            "Profile-web-page-url": request.url.includes('?') ? request.url.split('?')[0] : request.url,
+                            "Subscription-Userinfo": `upload=${pagesSum}; download=${workersSum}; total=${total}; expire=${expire}`,
+                        }
+                    });
+                }
             } else {
-                if (env.URL302) return Response.redirect(env.URL302, 302);
-                else return new Response('should not be here');
+                return new Response('Hello World! Path: ' + reqPath);
             }
-        }else {
+        } else {
             return await epOverWSHandler(request);
         }
 
@@ -61,7 +139,7 @@ async function epOverWSHandler(request) {
     webSocket.accept();
 
     let address = '';
-    
+
     const earlyDataHeader = request.headers.get('sec-websocket-protocol') || '';
 
     const readableWebSocketStream = makeReadableWebSocketStream(webSocket, earlyDataHeader);
@@ -122,13 +200,13 @@ async function epOverWSHandler(request) {
             }
         },
         close() {
-            
+
         },
         abort(reason) {
-            
+
         },
     })).catch((err) => {
-        
+
     });
 
     return new Response(null, {
@@ -170,7 +248,7 @@ function makeReadableWebSocketStream(webSocketServer, earlyDataHeader) {
             }
         },
 
-        pull(controller) {},
+        pull(controller) { },
 
         cancel(reason) {
             if (readableStreamCancel) {
@@ -218,7 +296,7 @@ function processEpHeader(epBuffer, subPath) {
     )[0];
 
     if (command === 1) {
-        
+
     } else if (command === 2) {
         isUDP = true;
     } else {
@@ -285,12 +363,12 @@ function processEpHeader(epBuffer, subPath) {
 
     return {
         hasError: false,
-        addressRemote: addressValue,  
-        addressType,				 
-        portRemote,				
-        rawDataIndex: addressValueIndex + addressLength,  
-        epVersion: version,	 
-        isUDP,					
+        addressRemote: addressValue,
+        addressType,
+        portRemote,
+        rawDataIndex: addressValueIndex + addressLength,
+        epVersion: version,
+        isUDP,
     };
 }
 
@@ -301,7 +379,8 @@ async function handleUDPOutBound(webSocket, epResponseHeader) {
         start(controller) {
 
         },
-        transform(chunk, controller) {for (let index = 0; index < chunk.byteLength;) {
+        transform(chunk, controller) {
+            for (let index = 0; index < chunk.byteLength;) {
                 const lengthBuffer = chunk.slice(index, index + 2);
                 const udpPakcetLength = new DataView(lengthBuffer).getUint16(0);
                 const udpData = new Uint8Array(
@@ -337,12 +416,12 @@ async function handleUDPOutBound(webSocket, epResponseHeader) {
                 }
             }
         }
-    })).catch((error) => {});
+    })).catch((error) => { });
 
     const writer = transformStream.writable.getWriter();
 
     return {
-         write(chunk) {
+        write(chunk) {
             writer.write(chunk);
         }
     };
@@ -375,7 +454,7 @@ async function handleTCPOutBound(remoteSocket, addressType, addressRemote, portR
             const nat64Proxyip = `[${await resolveToIPv6(addressRemote)}]`;
             tcpSocket = await connectAndWrite(nat64Proxyip, 443);
         }
-        tcpSocket.closed.catch(error => {}).finally(() => {
+        tcpSocket.closed.catch(error => { }).finally(() => {
             safeCloseWebSocket(webSocket);
         })
         remoteSocketToWS(tcpSocket, webSocket, epResponseHeader, null);
@@ -386,7 +465,7 @@ async function handleTCPOutBound(remoteSocket, addressType, addressRemote, portR
             tcpSocket = await connectAndWrite(addressRemote, portRemote, true, enableHttp);
         } else {
             if (!proxyIP || proxyIP == '') {
-                proxyIP = atob('UFJPWFlJUC50c'+'DEuMDkwMjI3Lnh5eg==');
+                proxyIP = atob('UFJPWFlJUC50c' + 'DEuMDkwMjI3Lnh5eg==');
             } else if (proxyIP.includes(']:')) {
                 portRemote = proxyIP.split(']:')[1] || portRemote;
                 proxyIP = proxyIP.split(']:')[0] + "]" || proxyIP;
@@ -407,15 +486,15 @@ async function handleTCPOutBound(remoteSocket, addressType, addressRemote, portR
     remoteSocketToWS(tcpSocket, webSocket, epResponseHeader, retry);
 }
 
-const WS_READY_STATE_OPEN = 1;	
-const WS_READY_STATE_CLOSING = 2; 
+const WS_READY_STATE_OPEN = 1;
+const WS_READY_STATE_CLOSING = 2;
 
 function safeCloseWebSocket(socket) {
     try {
         if (socket.readyState === WS_READY_STATE_OPEN || socket.readyState === WS_READY_STATE_CLOSING) {
             socket.close();
         }
-    } catch (error) {}
+    } catch (error) { }
 }
 
 function base64ToArrayBuffer(base64Str) {
@@ -446,7 +525,7 @@ for (let i = 0; i < 256; ++i) {
 }
 
 function unStrify(arr, offset = 0) {
-     return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" +
+    return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" +
         byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" +
         byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" +
         byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" +
@@ -523,7 +602,7 @@ async function httpConnect(addressRemote, portRemote) {
                         });
 
                         const { readable, writable } = new TransformStream();
-                        dataStream.pipeTo(writable).catch(err => {});
+                        dataStream.pipeTo(writable).catch(err => { });
 
                         sock.readable = readable;
                     }
@@ -550,15 +629,15 @@ async function httpConnect(addressRemote, portRemote) {
 async function sosConnect(addressType, addressRemote, portRemote) {
     const { username, password, hostname, port } = parsedSocks5Address;
     const socket = connect({
-        hostname, 
-        port,	
+        hostname,
+        port,
     });
 
     const socksGreeting = new Uint8Array([5, 2, 0, 2]);
     const writer = socket.writable.getWriter();
 
     await writer.write(socksGreeting);
-   const reader = socket.readable.getReader();
+    const reader = socket.readable.getReader();
     const encoder = new TextEncoder();
     let res = (await reader.read()).value;
 
@@ -573,35 +652,35 @@ async function sosConnect(addressType, addressRemote, portRemote) {
         if (!username || !password) {
             return;
         }
-    
+
         const authRequest = new Uint8Array([
-            1,				   
-            username.length,	
-            ...encoder.encode(username), 
-            password.length,	
-            ...encoder.encode(password)  
+            1,
+            username.length,
+            ...encoder.encode(username),
+            password.length,
+            ...encoder.encode(password)
         ]);
         await writer.write(authRequest);
         res = (await reader.read()).value;
         if (res[0] !== 0x01 || res[1] !== 0x00) {
-            
+
             return;
         }
     }
 
-    let DSTADDR;	
+    let DSTADDR;
     switch (addressType) {
-        case 1: 
+        case 1:
             DSTADDR = new Uint8Array(
                 [1, ...addressRemote.split('.').map(Number)]
             );
             break;
-        case 2: 
+        case 2:
             DSTADDR = new Uint8Array(
                 [3, addressRemote.length, ...encoder.encode(addressRemote)]
             );
             break;
-        case 3: 
+        case 3:
             DSTADDR = new Uint8Array(
                 [4, ...addressRemote.split(':').flatMap(x => [parseInt(x.slice(0, 2), 16), parseInt(x.slice(2), 16)])]
             );
@@ -611,13 +690,13 @@ async function sosConnect(addressType, addressRemote, portRemote) {
     }
     const socksRequest = new Uint8Array([5, 1, 0, ...DSTADDR, portRemote >> 8, portRemote & 0xff]);
     await writer.write(socksRequest);
-    
+
 
     res = (await reader.read()).value;
     if (res[1] === 0x00) {
-        
+
     } else {
-        
+
         return;
     }
     writer.releaseLock();
@@ -626,10 +705,10 @@ async function sosConnect(addressType, addressRemote, portRemote) {
 }
 
 async function resolveToIPv6(target) {
-    const defaultAddress = atob('cHJveHlpcC5jb'+'WxpdXNzc3MubmV0');
+    const defaultAddress = atob('cHJveHlpcC5jb' + 'WxpdXNzc3MubmV0');
     if (!DNS64Server) {
         try {
-            const response = await fetch(atob('aHR0cHM6Ly8xLjE'+'uMS4xL2Rucy1xdWVyeT9uYW1lPW5hdDY0Lm'+'NtbGl1c3Nzcy5uZXQmdHlwZT1UWFQ='), {
+            const response = await fetch(atob('aHR0cHM6Ly8xLjE' + 'uMS4xL2Rucy1xdWVyeT9uYW1lPW5hdDY0Lm' + 'NtbGl1c3Nzcy5uZXQmdHlwZT1UWFQ='), {
                 headers: { 'Accept': 'application/dns-json' }
             });
 
@@ -709,10 +788,10 @@ async function resolveToIPv6(target) {
         const view = new DataView(buffer);
         let offset = 0;
 
-        view.setUint16(offset, Math.floor(Math.random() * 65536)); offset += 2; 
-        view.setUint16(offset, 0x0100); offset += 2; 
-        view.setUint16(offset, 1); offset += 2; 
-        view.setUint16(offset, 0); offset += 6; 
+        view.setUint16(offset, Math.floor(Math.random() * 65536)); offset += 2;
+        view.setUint16(offset, 0x0100); offset += 2;
+        view.setUint16(offset, 1); offset += 2;
+        view.setUint16(offset, 0); offset += 6;
 
         for (const label of domain.split('.')) {
             view.setUint8(offset++, label.length);
@@ -720,10 +799,10 @@ async function resolveToIPv6(target) {
                 view.setUint8(offset++, label.charCodeAt(i));
             }
         }
-        view.setUint8(offset++, 0); 
+        view.setUint8(offset++, 0);
 
-        view.setUint16(offset, 28); offset += 2; 
-        view.setUint16(offset, 1); offset += 2; 
+        view.setUint16(offset, 28); offset += 2;
+        view.setUint16(offset, 1); offset += 2;
 
         return new Uint8Array(buffer, 0, offset);
     }
@@ -761,7 +840,7 @@ async function resolveToIPv6(target) {
 
     function parseIPv6(response) {
         const view = new DataView(response.buffer);
-        let offset = 12; 
+        let offset = 12;
 
         while (view.getUint8(offset) !== 0) {
             offset += view.getUint8(offset) + 1;
@@ -769,7 +848,7 @@ async function resolveToIPv6(target) {
         offset += 5;
 
         const answers = [];
-        const answerCount = view.getUint16(6); 
+        const answerCount = view.getUint16(6);
 
         for (let i = 0; i < answerCount; i++) {
             if ((view.getUint8(offset) & 0xC0) === 0xC0) {
@@ -782,10 +861,10 @@ async function resolveToIPv6(target) {
             }
 
             const type = view.getUint16(offset); offset += 2;
-            offset += 6; 
+            offset += 6;
             const dataLength = view.getUint16(offset); offset += 2;
 
-            if (type === 28 && dataLength === 16) { 
+            if (type === 28 && dataLength === 16) {
                 const parts = [];
                 for (let j = 0; j < 8; j++) {
                     parts.push(view.getUint16(offset + j * 2).toString(16));
@@ -816,9 +895,9 @@ async function resolveToIPv6(target) {
     }
 
     try {
-        if (isIPv6(target)) return target; 
+        if (isIPv6(target)) return target;
         const ipv4 = isIPv4(target) ? target : await fetchIPv4(target);
-        const nat64 = DNS64Server.endsWith('/96') ? convertToNAT64IPv6(ipv4) : await queryNAT64(ipv4 + atob('LmlwLjA5MDIyNy54eXo='));
+        const nat64 = DNS64Server.endsWith('/96') ? convertToNAT64IPv6(ipv4) : await queryNAT64(ipv4 + atob('LmlwLjA5MD' + 'IyNy54eXo='));
         return isIPv6(nat64) ? nat64 : defaultAddress;
     } catch (error) {
         return defaultAddress;
@@ -830,45 +909,591 @@ async function remoteSocketToWS(remoteSocket, webSocket, epResponseHeader, retry
     let chunks = [];
     /** @type {ArrayBuffer | null} */
     let 维列斯Header = epResponseHeader;
-    let hasIncomingData = false; 
+    let hasIncomingData = false;
 
     await remoteSocket.readable
         .pipeTo(
             new WritableStream({
                 start() {
-                    
+
                 },
                 async write(chunk, controller) {
-                    hasIncomingData = true; 
+                    hasIncomingData = true;
 
-                    
+
                     if (webSocket.readyState !== WS_READY_STATE_OPEN) {
-                        
+
                     }
 
                     if (维列斯Header) {
                         webSocket.send(await new Blob([维列斯Header, chunk]).arrayBuffer());
-                        维列斯Header = null; 
+                        维列斯Header = null;
                     } else {
-                        
+
                         webSocket.send(chunk);
                     }
                 },
                 close() {
-                    
+
                 },
                 abort(reason) {
-                    
+
                 },
             })
         )
         .catch((error) => {
-            
+
             safeCloseWebSocket(webSocket);
         });
 
     if (hasIncomingData === false && retry) {
-    
+
         retry();
     }
+}
+
+async function sendMessage(type, ip, add_data = "") {
+    if (!BotToken || !ChatID) return;
+
+    try {
+        let msg = "";
+        const response = await fetch(`http://ip-api.com/json/${ip}?lang=zh-CN`);
+        if (response.ok) {
+            const ipInfo = await response.json();
+            msg = `${type}\nIP: ${ip}\n国家: ${ipInfo.country}\n<tg-spoiler>城市: ${ipInfo.city}\n组织: ${ipInfo.org}\nASN: ${ipInfo.as}\n${add_data}`;
+        } else {
+            msg = `${type}\nIP: ${ip}\n<tg-spoiler>${add_data}`;
+        }
+
+        const url = `https://api.telegram.org/bot${BotToken}/sendMessage?chat_id=${ChatID}&parse_mode=HTML&text=${encodeURIComponent(msg)}`;
+        return fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'User-Agent': 'Mozilla/5.0 Chrome/90.0.4430.72'
+            }
+        });
+    } catch (error) { }
+}
+
+let subParams = ['sub', 'b64', 'sb'];
+
+const shaFun = atob('ZG14b' + 'GMzTT0=');
+
+async function genConf(userID, hostName, sub, UA, RproxyIP, _url, mirrorUserID, mirrorHostName, env) {
+    if (sub) {
+        const match = sub.match(/^(?:https?:\/\/)?([^\/]+)/);
+        if (match) {
+            sub = match[1];
+        }
+        const subs = await 整理(sub);
+        if (subs.length > 1) sub = subs[0];
+    } else {
+        if (env.KV) {
+            await 迁移地址列表(env);
+            const 优选地址列表 = await env.KV.get('ADD.txt');
+            if (优选地址列表) {
+                const 优选地址数组 = await 整理(优选地址列表);
+                const 分类地址 = {
+                    接口地址: new Set(),
+                    链接地址: new Set(),
+                    优选地址: new Set()
+                };
+
+                for (const 元素 of 优选地址数组) {
+                    if (元素.startsWith('https://')) {
+                        分类地址.接口地址.add(元素);
+                    } else if (元素.includes('://')) {
+                        分类地址.链接地址.add(元素);
+                    } else {
+                        分类地址.优选地址.add(元素);
+                    }
+                }
+
+                addressesapi = [...分类地址.接口地址];
+                link = [...分类地址.链接地址];
+                addresses = [...分类地址.优选地址];
+            }
+        }
+
+        if ((addresses.length + addressesapi.length + addressesnotls.length + addressesnotlsapi.length + addressescsv.length) == 0) {
+            let cfips = ['104.16.0.0/13', '162.159.152.0/23',
+                '172.64.146.0/24',
+                '172.64.229.0/24',
+                '104.16.0.0/16',
+                '104.17.0.0/16',
+                '104.18.0.0/16',
+                '104.19.0.0/16',
+                '104.20.0.0/16',
+                '104.21.0.0/16',
+                '104.22.0.0/16',
+                '104.24.0.0/16',
+                '104.25.0.0/16',
+                '104.26.0.0/16',
+                '104.27.0.0/16',
+                '172.66.0.0/16',
+                '172.67.0.0/16'];
+
+            // 生成符合给定 CIDR 范围的随机 IP 地址
+            function generateRandomIPFromCIDR(cidr) {
+                const [base, mask] = cidr.split('/');
+                const baseIP = base.split('.').map(Number);
+                const subnetMask = 32 - parseInt(mask, 10);
+                const maxHosts = Math.pow(2, subnetMask) - 1;
+                const randomHost = Math.floor(Math.random() * maxHosts);
+
+                const randomIP = baseIP.map((octet, index) => {
+                    if (index < 2) return octet;
+                    if (index === 2) return (octet & (255 << (subnetMask - 8))) + ((randomHost >> 8) & 255);
+                    return (octet & (255 << subnetMask)) + (randomHost & 255);
+                });
+
+                return randomIP.join('.');
+            }
+            addresses = addresses.concat('127.0.0.1:1234#CFnat');
+            let counter = 1;
+            if (hostName.includes("worker") || hostName.includes("notls")) {
+                const randomPorts = httpPorts.concat('80');
+                addressesnotls = addressesnotls.concat(
+                    cfips.map(cidr => generateRandomIPFromCIDR(cidr) + ':' + randomPorts[Math.floor(Math.random() * randomPorts.length)] + '#CF随机节点' + String(counter++).padStart(2, '0'))
+                );
+            } else {
+                const randomPorts = httpsPorts.concat('443');
+                addresses = addresses.concat(
+                    cfips.map(cidr => generateRandomIPFromCIDR(cidr) + ':' + randomPorts[Math.floor(Math.random() * randomPorts.length)] + '#CF随机节点' + String(counter++).padStart(2, '0'))
+                );
+            }
+        }
+    }
+
+    const userAgent = UA.toLowerCase();
+
+    let proxyhost = "";
+    if (hostName.includes(".workers.dev")) {
+        if (proxyhostsURL && (!proxyhosts || proxyhosts.length == 0)) {
+            try {
+                const response = await fetch(proxyhostsURL);
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const text = await response.text();
+                const lines = text.split('\n');
+                const nonEmptyLines = lines.filter(line => line.trim() !== '');
+
+                proxyhosts = proxyhosts.concat(nonEmptyLines);
+            } catch (error) { }
+        }
+        if (proxyhosts.length != 0) proxyhost = proxyhosts[Math.floor(Math.random() * proxyhosts.length)] + "/";
+    }
+
+    if (userAgent.includes('mozilla') && !subParams.some(_searchParams => _url.searchParams.has(_searchParams))) {
+        const newSocks5s = socks5s.map(socks5Address => {
+            if (socks5Address.includes('@')) return socks5Address.split('@')[1];
+            else if (socks5Address.includes('//')) return socks5Address.split('//')[1];
+            else return socks5Address;
+        });
+
+        let socks5List = '';
+        if (go2Socks5s.length > 0 && enableSocks) {
+            socks5List = `${(enableHttp ? "HTTP" : "Socks5") + decodeURIComponent('%EF%BC%88%E7%99%BD%E5%90%8D%E5%8D%95%EF%BC%89%3A%20')}`;
+            if (go2Socks5s.includes(atob('YWxsIGlu')) || go2Socks5s.includes(atob('Kg=='))) socks5List += `${decodeURIComponent('%E6%89%80%E6%9C%89%E6%B5%81%E9%87%8F')}<br>`;
+            else socks5List += `<br>&nbsp;&nbsp;${go2Socks5s.join('<br>&nbsp;&nbsp;')}<br>`;
+        }
+        return `<div></div>`;
+    } else {
+        if (typeof fetch != 'function') {
+            return 'Error: fetch is not available in this environment.';
+        }
+
+        let newAddressesapi = [];
+        let newAddressescsv = [];
+        let newAddressesnotlsapi = [];
+        let newAddressesnotlscsv = [];
+
+        if (hostName.includes(".workers.dev")) {
+            noTLS = 'true';
+            mirrorHostName = `${mirrorHostName}.workers.dev`;
+            newAddressesnotlsapi = await 整理优选列表(addressesnotlsapi);
+            newAddressesnotlscsv = await 整理测速结果('FALSE');
+        } else if (hostName.includes(".pages.dev")) {
+            mirrorHostName = `${mirrorHostName}.pages.dev`;
+        } else if (hostName.includes("worker") || hostName.includes("notls") || noTLS == 'true') {
+            noTLS = 'true';
+            mirrorHostName = `notls${mirrorHostName}.net`;
+            newAddressesnotlsapi = await 整理优选列表(addressesnotlsapi);
+            newAddressesnotlscsv = await 整理测速结果('FALSE');
+        } else {
+            mirrorHostName = `${mirrorHostName}.xyz`
+        }
+        let url = `${subProtocol}://${sub}/sub?host=${mirrorHostName}&uuid=${mirrorUserID + atob('JmVkZ2V0dW5uZWw9Y2' + '1saXUmcHJveHlpcD0=') + RproxyIP}&path=${encodeURIComponent(path)}`;
+        let isBase64 = true;
+
+        if (!sub || sub == "") {
+            if (hostName.includes('workers.dev')) {
+                if (proxyhostsURL && (!proxyhosts || proxyhosts.length == 0)) {
+                    try {
+                        const response = await fetch(proxyhostsURL);
+                        if (!response.ok) {
+                            return;
+                        }
+
+                        const text = await response.text();
+                        const lines = text.split('\n');
+                        const nonEmptyLines = lines.filter(line => line.trim() !== '');
+
+                        proxyhosts = proxyhosts.concat(nonEmptyLines);
+                    } catch (error) { }
+                }
+                proxyhosts = [...new Set(proxyhosts)];
+            }
+
+            newAddressesapi = await 整理优选列表(addressesapi);
+            newAddressescsv = await 整理测速结果('TRUE');
+            url = `https://${hostName}/${mirrorUserID + _url.search}`;
+            if (hostName.includes("worker") || hostName.includes("notls") || noTLS == 'true') {
+                if (_url.search) url += '&notls';
+                else url += '?notls';
+            }
+        }
+
+        if (userAgent.includes(('CF-Workers-SUB').toLowerCase()) || _url.searchParams.has('b64') || _url.searchParams.has('base64') || userAgent.includes('subconverter')) {
+            isBase64 = true;
+        } else if ((userAgent.includes('clash') && !userAgent.includes('nekobox')) || (_url.searchParams.has('clash'))) {
+            url = `${subProtocol}://${subConverter}/sub?target=clash&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
+            isBase64 = false;
+        } else if (userAgent.includes('sing-box') || userAgent.includes('singbox') || _url.searchParams.has('singbox') || _url.searchParams.has('sb')) {
+            url = `${subProtocol}://${subConverter}/sub?target=singbox&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
+            isBase64 = false;
+        } else if (userAgent.includes('loon') || _url.searchParams.has('loon')) {
+            url = `${subProtocol}://${subConverter}/sub?target=loon&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
+            isBase64 = false;
+        }
+
+        try {
+            let content;
+            if ((!sub || sub == "") && isBase64 == true) {
+                content = await 生成本地订阅(mirrorHostName, mirrorUserID, noTLS, newAddressesapi, newAddressescsv, newAddressesnotlsapi, newAddressesnotlscsv);
+            } else {
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'v2r' + 'ayN' + atob('L2VkZ2V0dW5uZWwgKGh0' + 'dHBzOi8vZ2l0aHViLmNvbS9jbWxpdS9lZGdldHVubmVsKQ==')
+                    }
+                });
+                content = await response.text();
+            }
+
+            if (_url.pathname == `/${mirrorUserID}`) return content;
+
+            return 恢复模糊信息(content, userID, hostName, mirrorUserID, mirrorHostName, isBase64);
+
+        } catch (error) {
+            return `Error fetching content: ${error.message}`;
+        }
+    }
+}
+
+async function 双重哈希(文本) {
+    const 编码器 = new TextEncoder();
+
+    const 第一次哈希 = await crypto.subtle.digest('MD5', 编码器.encode(文本));
+    const 第一次哈希数组 = Array.from(new Uint8Array(第一次哈希));
+    const 第一次十六进制 = 第一次哈希数组.map(字节 => 字节.toString(16).padStart(2, '0')).join('');
+
+    const 第二次哈希 = await crypto.subtle.digest('MD5', 编码器.encode(第一次十六进制.slice(7, 27)));
+    const 第二次哈希数组 = Array.from(new Uint8Array(第二次哈希));
+    const 第二次十六进制 = 第二次哈希数组.map(字节 => 字节.toString(16).padStart(2, '0')).join('');
+
+    return 第二次十六进制.toLowerCase();
+}
+
+async function 整理(内容) {
+    var 替换后的内容 = 内容.replace(/[	"'\r\n]+/g, ',').replace(/,+/g, ',');
+
+    if (替换后的内容.charAt(0) == ',') 替换后的内容 = 替换后的内容.slice(1);
+    if (替换后的内容.charAt(替换后的内容.length - 1) == ',') 替换后的内容 = 替换后的内容.slice(0, 替换后的内容.length - 1);
+
+    const 地址数组 = 替换后的内容.split(',');
+    return 地址数组;
+}
+
+async function 迁移地址列表(env, txt = 'ADD.txt') {
+    const 旧数据 = await env.KV.get(`/${txt}`);
+    const 新数据 = await env.KV.get(txt);
+
+    if (旧数据 && !新数据) {
+        await env.KV.put(txt, 旧数据);
+        await env.KV.delete(`/${txt}`);
+        return true;
+    }
+    return false;
+}
+
+async function 整理优选列表(api) {
+    if (!api || api.length === 0) return [];
+
+    let newapi = "";
+
+
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, 2000);
+
+    try {
+        const responses = await Promise.allSettled(api.map(apiUrl => fetch(apiUrl, {
+            method: 'get',
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;',
+                'User-Agent': atob('Q0YtV29ya2Vycy1lZ' + 'GdldHVubmVsL2NtbGl1')
+            },
+            signal: controller.signal
+        }).then(response => response.ok ? response.text() : Promise.reject())));
+
+        for (const [index, response] of responses.entries()) {
+            if (response.status === 'fulfilled') {
+                const content = await response.value;
+
+                const lines = content.split(/\r?\n/);
+                let 节点备注 = '';
+                let 测速端口 = '443';
+
+                if (lines[0].split(',').length > 3) {
+                    const idMatch = api[index].match(/id=([^&]*)/);
+                    if (idMatch) 节点备注 = idMatch[1];
+
+                    const portMatch = api[index].match(/port=([^&]*)/);
+                    if (portMatch) 测速端口 = portMatch[1];
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const columns = lines[i].split(',')[0];
+                        if (columns) {
+                            newapi += `${columns}:${测速端口}${节点备注 ? `#${节点备注}` : ''}\n`;
+                            if (api[index].includes('proxyip=true')) proxyIPPool.push(`${columns}:${测速端口}`);
+                        }
+                    }
+                } else {
+                    if (api[index].includes('proxyip=true')) {
+                        proxyIPPool = proxyIPPool.concat((await 整理(content)).map(item => {
+                            const baseItem = item.split('#')[0] || item;
+                            if (baseItem.includes(':')) {
+                                const port = baseItem.split(':')[1];
+                                if (!httpsPorts.includes(port)) {
+                                    return baseItem;
+                                }
+                            } else {
+                                return `${baseItem}:443`;
+                            }
+                            return null;
+                        }).filter(Boolean));
+                    }
+                    newapi += content + '\n';
+                }
+            }
+        }
+    } catch (error) { } finally {
+        clearTimeout(timeout);
+    }
+    const newAddressesapi = await 整理(newapi);
+    return newAddressesapi;
+}
+
+async function 整理测速结果(tls) {
+    if (!addressescsv || addressescsv.length === 0) {
+        return [];
+    }
+
+    let newAddressescsv = [];
+
+    for (const csvUrl of addressescsv) {
+        try {
+            const response = await fetch(csvUrl);
+
+            if (!response.ok) {
+                continue;
+            }
+
+            const text = await response.text();
+            let lines;
+            if (text.includes('\r\n')) {
+                lines = text.split('\r\n');
+            } else {
+                lines = text.split('\n');
+            }
+
+            const header = lines[0].split(',');
+            const tlsIndex = header.indexOf('TLS');
+
+            const ipAddressIndex = 0;
+            const portIndex = 1;
+            const dataCenterIndex = tlsIndex + remarkIndex;
+
+            if (tlsIndex === -1) {
+                continue;
+            }
+
+            for (let i = 1; i < lines.length; i++) {
+                const columns = lines[i].split(',');
+                const speedIndex = columns.length - 1;
+                if (columns[tlsIndex].toUpperCase() === tls && parseFloat(columns[speedIndex]) > DLS) {
+                    const ipAddress = columns[ipAddressIndex];
+                    const port = columns[portIndex];
+                    const dataCenter = columns[dataCenterIndex];
+
+                    const formattedAddress = `${ipAddress}:${port}#${dataCenter}`;
+                    newAddressescsv.push(formattedAddress);
+                    if (csvUrl.includes('proxyip=true') && columns[tlsIndex].toUpperCase() == 'true' && !httpsPorts.includes(port)) {
+                        proxyIPPool.push(`${ipAddress}:${port}`);
+                    }
+                }
+            }
+        } catch (error) {
+            continue;
+        }
+    }
+
+    return newAddressescsv;
+}
+
+function 生成本地订阅(host, UUID, noTLS, newAddressesapi, newAddressescsv, newAddressesnotlsapi, newAddressesnotlscsv) {
+    const regex = /^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|\[.*\]):?(\d+)?#?(.*)?$/;
+    addresses = addresses.concat(newAddressesapi);
+    addresses = addresses.concat(newAddressescsv);
+    let notlsresponseBody;
+    if (noTLS == 'true') {
+        addressesnotls = addressesnotls.concat(newAddressesnotlsapi);
+        addressesnotls = addressesnotls.concat(newAddressesnotlscsv);
+        const uniqueAddressesnotls = [...new Set(addressesnotls)];
+
+        notlsresponseBody = uniqueAddressesnotls.map(address => {
+            let port = "-1";
+            let addressid = address;
+
+            const match = addressid.match(regex);
+            if (!match) {
+                if (address.includes(':') && address.includes('#')) {
+                    const parts = address.split(':');
+                    address = parts[0];
+                    const subParts = parts[1].split('#');
+                    port = subParts[0];
+                    addressid = subParts[1];
+                } else if (address.includes(':')) {
+                    const parts = address.split(':');
+                    address = parts[0];
+                    port = parts[1];
+                } else if (address.includes('#')) {
+                    const parts = address.split('#');
+                    address = parts[0];
+                    addressid = parts[1];
+                }
+
+                if (addressid.includes(':')) {
+                    addressid = addressid.split(':')[0];
+                }
+            } else {
+                address = match[1];
+                port = match[2] || port;
+                addressid = match[3] || address;
+            }
+
+            if (!isValidIPv4(address) && port == "-1") {
+                for (let httpPort of httpPorts) {
+                    if (address.includes(httpPort)) {
+                        port = httpPort;
+                        break;
+                    }
+                }
+            }
+            if (port == "-1") port = "80";
+
+            let 模糊域名 = host;
+            let 最终路径 = path;
+            let 节点备注 = '';
+            const 协议类型 = atob(shaFun);
+
+            const ctx = `${协议类型}://${UUID}@${address}:${port + atob('P2VuY3J5cHRpb249bm' + '9uZSZzZWN1cml0eT0mdHlwZT13cyZob3N0PQ==') + 模糊域名}&path=${encodeURIComponent(最终路径)}#${encodeURIComponent(addressid + 节点备注)}`;
+
+            return ctx;
+
+        }).join('\n');
+
+    }
+
+    const uniqueAddresses = [...new Set(addresses)];
+
+    const responseBody = uniqueAddresses.map(address => {
+        let port = "-1";
+        let addressid = address;
+
+        const match = addressid.match(regex);
+        if (!match) {
+            if (address.includes(':') && address.includes('#')) {
+                const parts = address.split(':');
+                address = parts[0];
+                const subParts = parts[1].split('#');
+                port = subParts[0];
+                addressid = subParts[1];
+            } else if (address.includes(':')) {
+                const parts = address.split(':');
+                address = parts[0];
+                port = parts[1];
+            } else if (address.includes('#')) {
+                const parts = address.split('#');
+                address = parts[0];
+                addressid = parts[1];
+            }
+
+            if (addressid.includes(':')) {
+                addressid = addressid.split(':')[0];
+            }
+        } else {
+            address = match[1];
+            port = match[2] || port;
+            addressid = match[3] || address;
+        }
+
+        if (!isValidIPv4(address) && port == "-1") {
+            for (let httpsPort of httpsPorts) {
+                if (address.includes(httpsPort)) {
+                    port = httpsPort;
+                    break;
+                }
+            }
+        }
+        if (port == "-1") port = "443";
+
+        let 模糊域名 = host;
+        let 最终路径 = path;
+        let 节点备注 = '';
+        const matchingProxyIP = proxyIPPool.find(proxyIP => proxyIP.includes(address));
+        if (matchingProxyIP) 最终路径 = `/proxyip=${matchingProxyIP}`;
+        const 协议类型 = atob(shaFun);
+        const ctx = `${协议类型}://${UUID}@${address}:${port + atob('P2VuY3J5cHRpb249bm9uZSZ' + 'zZWN1cml0eT10bHMmc25pPQ==') + 模糊域名}&fp=random&type=ws&host=${模糊域名}&path=${encodeURIComponent(最终路径) + allowInsecure}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}#${encodeURIComponent(addressid + 节点备注)}`;
+
+        return ctx;
+    }).join('\n');
+
+    let base64Response = responseBody;
+    if (noTLS == 'true') base64Response += `\n${notlsresponseBody}`;
+    if (link.length > 0) base64Response += '\n' + link.join('\n');
+    return btoa(base64Response);
+}
+
+function 恢复模糊信息(content, userID, hostName, mirrorUserID, mirrorHostName, isBase64) {
+    if (isBase64) content = atob(content);
+
+    content = content.replace(new RegExp(mirrorUserID, 'g'), userID)
+        .replace(new RegExp(mirrorHostName, 'g'), hostName);
+
+    if (isBase64) content = btoa(content);
+
+    return content;
+}
+
+function isValidIPv4(address) {
+    const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    return ipv4Regex.test(address);
 }
